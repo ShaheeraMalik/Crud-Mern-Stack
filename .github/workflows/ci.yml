@@ -30,7 +30,7 @@ jobs:
             # Enter the project, pull latest changes, rebuild and redeploy
             cd "$TARGET"
             git pull origin main
-            docker-compose build --pull
-            docker-compose up -d
+            docker compose build --pull
+            docker compose up -d
 
             
