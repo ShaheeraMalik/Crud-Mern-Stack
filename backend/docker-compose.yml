@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   frontend:
-    image: ghcr.io/${DOCKER_USERNAME}/frontend:${TAG}
+    build: ./frontend
     restart: always
     ports:
       - "3000:80"
@@ -10,10 +10,10 @@ services:
       - app-network
 
   backend:
-    image: ghcr.io/${DOCKER_USERNAME}/backend:${TAG}
+    build: ./backend
     restart: always
     ports:
-      - "5000:5000"      # ← host port 5000 ⇒ container port 5000
+      - "5000:5000"
     depends_on:
       - mongo
     networks:
