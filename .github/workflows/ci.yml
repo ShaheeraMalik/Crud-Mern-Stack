@@ -27,4 +27,3 @@ jobs:
             git pull origin main
             docker-compose build --pull
             docker-compose up -d
-```
