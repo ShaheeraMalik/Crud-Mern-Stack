@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   mongo:
     image: mongo:6
@@ -12,8 +11,14 @@ services:
       - "5000:5000"
     depends_on:
       - mongo
+
+    # still injects into process.env if you ever drop dotenv
     env_file:
-      - backend/.env        # ← relative path to your backend/.env
+      - backend/.env
+
+    # this makes the file visible inside the container so dotenv can read it
+    volumes:
+      - ./backend/.env:/usr/src/app/.env:ro
 
   frontend:
     build: ./frontend
