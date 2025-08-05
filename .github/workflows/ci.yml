@@ -9,9 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     # environment: development
-    env:
-      PORT: ${{ secrets.PORT }}
-      MONGO_URI: ${{ secrets.MONGO_URI }}
     steps:
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
@@ -20,6 +17,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          envs: |
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            NODE_ENV=${{ secrets.NODE_ENV }}
+            PORT=${{ secrets.PORT }}
           debug: true
           script: |
             set -euxo pipefail
@@ -34,7 +35,7 @@ jobs:
             cd "$TARGET"
             git fetch origin main
             git reset --hard origin/main
-
+            echo 
             # Tear down existing services
             docker compose down --remove-orphans || true
 
