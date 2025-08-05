@@ -8,7 +8,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: .env
+    environment: development
+    env:
+      PORT: ${{ vars.PORT }}
+      MONGO_URI: ${{ vars.MONGO_URI }}
     steps:
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
@@ -31,13 +34,6 @@ jobs:
             cd "$TARGET"
             git fetch origin main
             git reset --hard origin/main
-
-            # Create .env in backend from secret
-            cat > backend/.env <<EOF
-            MONGO_URI=${{ secrets.MONGO_URI }}
-            NODE_ENV=production
-            PORT=5000
-            EOF
 
             # Tear down existing services
             docker compose down --remove-orphans || true
