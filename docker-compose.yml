@@ -12,14 +12,6 @@ services:
     depends_on:
       - mongo
 
-    # still injects into process.env if you ever drop dotenv
-    env_file:
-      - backend/.env
-
-    # this makes the file visible inside the container so dotenv can read it
-    volumes:
-      - ./backend/.env:/usr/src/app/.env:ro
-
   frontend:
     build: ./frontend
     ports:
