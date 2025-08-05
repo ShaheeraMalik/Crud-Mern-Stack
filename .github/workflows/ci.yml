@@ -10,7 +10,61 @@ jobs:
 
     steps:
       - name: Deploy to VM
+        uses: appleboy/ssh-action@v0.1.8name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          debug: true
+          script: |
+            set -euxo pipefail
+
+            TARGET="$HOME/new-app"
+
+            # Clone the repo if it isn't already present
+            if [ ! -d "$TARGET/.git" ]; then
+              rm -rf "$TARGET"
+              git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$TARGET"
+            fi
+
+            # Switch to latest main
+            cd "$TARGET"
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Generate real .env for the backend from GitHub Secrets
+            cat > backend/.env <<EOF
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            NODE_ENV=production
+            PORT=5000
+            EOF
+
+            # Tear down any existing containers (frees ports)
+            docker compose down --remove-orphans || true
+
+            # Stop host’s Nginx if it's listening on 3000
+            sudo systemctl stop nginx || true
+
+            # Remove any stray container binding port 3000
+            docker ps -q --filter "publish=3000" | xargs -r docker rm -f
+
+            # Rebuild and start services
+            docker compose build --pull
+            docker compose up -d
+
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
