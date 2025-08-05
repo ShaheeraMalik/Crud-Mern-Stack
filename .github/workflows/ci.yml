@@ -27,11 +27,14 @@ jobs:
               git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$TARGET"
             fi
 
-            # Enter the repo, reset to latest main, build & deploy
+            # Enter the repo, reset to latest main
             cd "$TARGET"
             git fetch origin main
             git reset --hard origin/main
 
-            # Use Docker Compose V2 plugin (ensure it's installed on VM)
+            # Tear down any existing containers (frees port 3000)
+            docker compose down --remove-orphans
+
+            # Rebuild & bring up fresh containers
             docker compose build --pull
             docker compose up -d
