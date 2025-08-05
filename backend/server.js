@@ -6,7 +6,6 @@ const connectDB = require('./config/db');
 const itemRoutes = require('./routes/itemRoutes');
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
@@ -24,6 +23,7 @@ app.get('/', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+app.listen(PORT, async() => {
   console.log(`🚀 Server listening on port ${PORT}`);
+  await connectDB();
 });
