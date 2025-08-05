@@ -1,28 +1,28 @@
 # 1. Build stage
 FROM node:18-alpine AS build
+
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package manifests and install deps
-COPY package.json package-lock.json ./
-RUN npm ci
+# Install dependencies
+COPY package*.json ./
+RUN npm install
 
-# Copy source and build the React app
+# Copy source & build
 COPY . .
 RUN npm run build
 
-# 2. Production stage
-FROM nginx:stable-alpine
-WORKDIR /usr/share/nginx/html
+# 2. Runtime stage
+FROM nginx:alpine
 
-# Remove default nginx assets
-RUN rm -rf ./*
+# Replace default Nginx config if needed
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built assets from build stage
-COPY --from=build /usr/src/app/build .
+# Serve React build output
+COPY --from=build /usr/src/app/build /usr/share/nginx/html
 
-# Copy custom nginx config
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Expose port and launch
+# Expose HTTP port
 EXPOSE 80
+
+# Launch Nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]
