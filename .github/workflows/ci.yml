@@ -18,8 +18,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           envs: |
-            MONGO_URI=${{ secrets.MONGO_URI }}
-            NODE_ENV=${{ secrets.NODE_ENV }}
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
             PORT=${{ secrets.PORT }}
           debug: true
           script: |
