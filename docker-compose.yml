@@ -20,9 +20,8 @@ services:
       - backend
 
 environment:
-  - MONGO_URI
-  - PORT
-
+  - MONGO_URI=${MONGO_URI}
+  - PORT=${PORT}
 volumes:
   mongo_data:
 
