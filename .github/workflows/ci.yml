@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     # environment: development
     env:
-      PORT: ${{ vars.PORT }}
-      MONGO_URI: ${{ vars.MONGO_URI }}
+      PORT: ${{ secrets.PORT }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
     steps:
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8

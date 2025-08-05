@@ -19,9 +19,9 @@ services:
     depends_on:
       - backend
 
-# environment:
-#   - MONGO_URI=${MONGO_URI}
-#   - PORT=${PORT}
+environment:
+  - MONGO_URI
+  - PORT
 volumes:
   mongo_data:
 
