@@ -21,9 +21,6 @@ services:
     depends_on:
       - backend
 
-environment:
-  - MONGO_URI
-  - PORT
 volumes:
   mongo_data:
 
