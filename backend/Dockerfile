@@ -1,23 +1,18 @@
-# 1. Build stage
-FROM node:18-alpine AS build
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-RUN npm ci
-
-COPY . .
-RUN npm run build   # if you have a build step; otherwise skip
-
-# 2. Runtime stage
+# Use the official Node.js 18 image
 FROM node:18-alpine
+
+# Create app directory
 WORKDIR /usr/src/app
 
-COPY --from=build /usr/src/app/package*.json ./
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app ./
+# Install only production dependencies
+COPY package*.json ./
+RUN npm install --production
+
+# Copy app source
+COPY . .
 
 # Expose the port your app listens on
 EXPOSE 5000
 
-ENTRYPOINT ["./scripts/entrypoint.sh"]
-CMD ["npm", "start"]
+# Start the server
+CMD ["node", "server.js"]
