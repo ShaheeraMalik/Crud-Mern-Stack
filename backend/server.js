@@ -7,12 +7,6 @@ const itemRoutes = require('./routes/itemRoutes');
 
 dotenv.config();
 
-export const mongoDBConfig = {
-  URI: process.env.MONGODB_URI
-}
-
-console.log(mongoDBConfig.URI);
-
 const app = express();
 
 // Middleware

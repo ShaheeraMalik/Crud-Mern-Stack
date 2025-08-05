@@ -1,10 +1,7 @@
 // config/db.js
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-dotenv.config();
 async function connectDB() {
   try {
-    console.log(process.env.MONGODB_URI);
     await mongoose.connect(process.env.MONGODB_URI, {
       // avoid IPv6 DNS resolution
       family: 4,
