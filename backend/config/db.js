@@ -1,11 +1,11 @@
 // config/db.js
 const mongoose = require('mongoose');
-const { mongoDBConfig } = require('../server');
-
+const dotenv = require('dotenv');
+dotenv.config();
 async function connectDB() {
   try {
-    console.log(mongoDBConfig.URI);
-    await mongoose.connect(mongoDBConfig.URI, {
+    console.log(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
       // avoid IPv6 DNS resolution
       family: 4,
       // extend how long the driver waits for server selection (in ms)
