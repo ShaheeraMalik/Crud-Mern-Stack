@@ -8,42 +8,44 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # environment: development
+    environment: production
+
     steps:
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          envs: |
-            MONGODB_URI=${{ secrets.MONGODB_URI }}
-            PORT=${{ secrets.PORT }}
-          debug: true
+          host:       ${{ secrets.SSH_HOST }}
+          username:   ${{ secrets.SSH_USER }}
+          key:        ${{ secrets.SSH_PRIVATE_KEY }}
+          port:       ${{ secrets.SSH_PORT }}
+          debug:      true
           script: |
             set -euxo pipefail
             TARGET="$HOME/new-app"
 
-            # Clone or update repo
+            # Clone or update your repo
             if [ ! -d "$TARGET/.git" ]; then
               rm -rf "$TARGET"
               git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$TARGET"
             fi
-
             cd "$TARGET"
             git fetch origin main
             git reset --hard origin/main
-            echo 
-            # Tear down existing services
+
+            # Export runtime variables for Compose substitution
+            export MONGODB_URI="${{ secrets.MONGODB_URI }}"
+            export PORT="${{ secrets.PORT }}"
+
+            # Tear down any existing stack
             docker compose down --remove-orphans || true
 
-            # Stop host Nginx if bound to port 3000
+            # Stop host Nginx on port 3000 if needed
             sudo systemctl stop nginx || true
 
-            # Remove any container still binding 3000
-            docker ps -q --filter "publish=3000" | xargs -r docker rm -f
+            # Free up any container holding our ports
+            docker ps -q --filter "publish=${PORT}" | xargs -r docker rm -f
+            docker ps -q --filter "publish=3000"   | xargs -r docker rm -f
 
-            # Rebuild & deploy
+            # Rebuild & redeploy
             docker compose build --pull
             docker compose up -d
