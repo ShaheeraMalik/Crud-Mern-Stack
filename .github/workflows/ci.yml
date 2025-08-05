@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: development
+    # environment: development
     env:
       PORT: ${{ vars.PORT }}
       MONGO_URI: ${{ vars.MONGO_URI }}
