@@ -1,15 +1,17 @@
+# .github/workflows/ci.yml
+
 name: CI / CD
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   ci:
+    name: CI: Install dependencies
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -17,29 +19,31 @@ jobs:
         with:
           node-version: 18
 
-      - run: |
-          npm ci
+      - name: Install backend deps
+        run: npm ci
         working-directory: backend
 
-      - run: |
-          npm ci
+      - name: Install frontend deps
+        run: npm ci
         working-directory: frontend
 
   deploy:
-    runs-on: ubuntu-latest
+    name: 🛡️ CD: Deploy to VM
     needs: ci
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    environment: production
+
     steps:
       - uses: actions/checkout@v3
 
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host:     ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key:      ${{ secrets.SSH_PRIVATE_KEY }}
-          port:     ${{ secrets.SSH_PORT }}
-          debug:    true
+          host:       ${{ secrets.SSH_HOST }}
+          username:   ${{ secrets.SSH_USER }}
+          key:        ${{ secrets.SSH_PRIVATE_KEY }}
+          port:       ${{ secrets.SSH_PORT }}
+          debug:      true
           script: |
             set -euxo pipefail
             cd "$HOME/new-app" || {
