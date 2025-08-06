@@ -28,7 +28,7 @@ jobs:
         working-directory: frontend
 
   deploy:
-    name: "🛡️ CD: Deploy to VM"
+    name: "CD: Deploy to VM"
     needs: ci
     runs-on: ubuntu-latest
     environment: production
@@ -46,16 +46,21 @@ jobs:
           debug:      true
           script: |
             set -euxo pipefail
-            cd "$HOME/new-app" || {
+
+            # Clone once, then pull updates thereafter
+            if [ -d "$HOME/new-app/.git" ]; then
+              cd "$HOME/new-app"
+              git pull --ff-only
+            else
               git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$HOME/new-app"
               cd "$HOME/new-app"
-            }
-            git fetch origin main
-            git reset --hard origin/main
+            fi
 
+            # Export runtime vars for Docker Compose
             export MONGODB_URI="${{ secrets.MONGODB_URI }}"
             export PORT="${{ secrets.PORT }}"
 
+            # Tear down, free ports and rebuild
             docker compose down --remove-orphans || true
             sudo systemctl stop nginx || true
             docker ps -q --filter "publish=${PORT}" | xargs -r docker rm -f
