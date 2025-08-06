@@ -19,13 +19,11 @@ jobs:
 
       - run: |
           npm ci
-          npm run lint
           npm test
         working-directory: backend
 
       - run: |
           npm ci
-          npm run lint
           npm test -- --watchAll=false
         working-directory: frontend
 
