@@ -1,51 +1,64 @@
-name: CI/CD
+name: CI / CD
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - run: |
+          npm ci
+          npm run lint
+          npm test
+        working-directory: backend
+
+      - run: |
+          npm ci
+          npm run lint
+          npm test -- --watchAll=false
+        working-directory: frontend
+
   deploy:
     runs-on: ubuntu-latest
-   
-
+    needs: ci
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
+      - uses: actions/checkout@v3
+
       - name: Deploy to VM
         uses: appleboy/ssh-action@v0.1.8
         with:
-          host:       ${{ secrets.SSH_HOST }}
-          username:   ${{ secrets.SSH_USER }}
-          key:        ${{ secrets.SSH_PRIVATE_KEY }}
-          port:       ${{ secrets.SSH_PORT }}
-          debug:      true
+          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key:      ${{ secrets.SSH_PRIVATE_KEY }}
+          port:     ${{ secrets.SSH_PORT }}
+          debug:    true
           script: |
             set -euxo pipefail
-            TARGET="$HOME/new-app"
-
-            # Clone or update your repo
-            if [ ! -d "$TARGET/.git" ]; then
-              rm -rf "$TARGET"
-              git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$TARGET"
-            fi
-            cd "$TARGET"
+            cd "$HOME/new-app" || {
+              git clone git@github.com:ShaheeraMalik/Crud-Mern-Stack.git "$HOME/new-app"
+              cd "$HOME/new-app"
+            }
             git fetch origin main
             git reset --hard origin/main
 
-            # Export runtime variables for Compose substitution
             export MONGODB_URI="${{ secrets.MONGODB_URI }}"
             export PORT="${{ secrets.PORT }}"
 
-            # Tear down any existing stack
             docker compose down --remove-orphans || true
-
-            # Stop host Nginx on port 3000 if needed
             sudo systemctl stop nginx || true
-
-            # Free up any container holding our ports
             docker ps -q --filter "publish=${PORT}" | xargs -r docker rm -f
-            docker ps -q --filter "publish=3000"   | xargs -r docker rm -f
 
-            # Rebuild & redeploy
             docker compose build --pull
             docker compose up -d
