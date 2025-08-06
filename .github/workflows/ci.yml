@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml
 
-name: CI / CD
+name: "CI/CD"
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   ci:
-    name: CI: Install dependencies
+    name: "CI: Install dependencies"
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,7 @@ jobs:
         working-directory: frontend
 
   deploy:
-    name: 🛡️ CD: Deploy to VM
+    name: "🛡️ CD: Deploy to VM"
     needs: ci
     runs-on: ubuntu-latest
     environment: production
