@@ -11,9 +11,8 @@ jobs:
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'           # Scans your file system (codebase)
+          scan-type: 'fs'            # Scans your file system (codebase)
           scan-ref: '.'
-          trivy-config: trivy.yaml  # Optional
-          format: 'table'           # Shows results in simple table
-          exit-code: '1'            # Fails the pipeline if viruses are found
-          severity: 'CRITICAL,HIGH' # Only stops for big problems
+          format: 'table'            # Shows results in simple table
+          exit-code: '1'             # Fails the pipeline if viruses are found
+          severity: 'CRITICAL,HIGH'  # Only stops for big problems
